@@ -1,0 +1,98 @@
+# Visitor Visa (V2). Worked example 1 in schema v1.
+stewardship:
+  prepared_by: build-team
+  approved_by: null
+  approved_on: null
+
+evidence_types:
+  - id: EV-BANK-STATEMENT
+    name: Bank statement showing funds the applicant can access in New Zealand
+  - id: EV-CARDS-CASH
+    name: Cash, travellers' cheques, bank drafts or credit/debit cards with sufficient credit
+  - id: EV-SPONSOR-FORM
+    name: Sponsorship Form for Temporary Entry (INZ 1025)
+  - id: EV-TICKET
+    name: Travel ticket out of New Zealand, or airline or agent confirmation of paid onward travel
+  - id: EV-ITINERARY
+    name: Itinerary and stated purpose of visit
+
+groups:
+  - id: VIS-ROOT
+    title: Visitor visa requirements
+    operator: ALL
+    ref: V2.1
+    members: [VIS-LAWFUL-PURPOSE, VIS-FUNDS, VIS-MATERNITY-FUNDS, VIS-ONWARD-TRAVEL, VIS-MAX-STAY]
+
+criteria:
+  - id: VIS-LAWFUL-PURPOSE
+    title: Coming to New Zealand for a lawful purpose
+    kind: discretionary
+    ref: V2.1
+    quote: "visitors are considered to be coming to New Zealand for a lawful purpose if: they are coming for such purposes as: holidaying; sightseeing; family and social visits; amateur sport; business consultation (see V3.5); medical treatment (see V3.40)"
+    evidence: [EV-ITINERARY]
+    factors:
+      - ref: V2.1
+        quote: "they are not intending to undertake employment (see W2.2.1) or a programme of study or training, with the exception of short-term study (see V2.35 and U2.5(b))"
+
+  - id: VIS-FUNDS
+    title: Funds of NZ$1,000 a month (NZ$400 if accommodation prepaid) or an acceptable sponsor
+    kind: objective
+    versions:
+      - ref: V2.20
+        quote: "funds that will be genuinely available to the applicant for the duration of their visa to New Zealand of at least NZ$1000 per month for maintenance and accommodation, or NZ$400 per month if the accommodation has been prepaid"
+      - ref: V2.20
+        as_at: 2020-01-01
+        quote: "NZ$1000 per month for maintenance and accommodation"
+    condition: "funds_per_month >= 1000 OR (accommodation_prepaid AND funds_per_month >= 400) OR acceptable_sponsor"
+    uses_list: [VISITOR_FUNDS]
+    evidence: [EV-BANK-STATEMENT, EV-CARDS-CASH, EV-SPONSOR-FORM]
+
+  - id: VIS-MATERNITY-FUNDS
+    title: Extra NZ$9,000 for maternity services if due to give birth in New Zealand
+    kind: objective
+    ref: V2.20
+    quote: "have funds of at least NZ$9,000 available to pay for maternity related services"
+    condition: "due_to_give_birth_in_nz -> (maternity_funds >= 9000 OR maternity_sponsor OR eligible_public_maternity)"
+    evidence: [EV-BANK-STATEMENT, EV-SPONSOR-FORM]
+
+  - id: VIS-ONWARD-TRAVEL
+    title: Means to leave New Zealand
+    kind: evidential
+    ref: V2.25
+    quote: "Applicants for a visitor visa are required to have the means to leave New Zealand."
+    evidence: [EV-TICKET, EV-SPONSOR-FORM]
+
+  - id: VIS-MAX-STAY
+    title: No more than nine months in the 18 months before the visa expires
+    kind: objective
+    ref: V2.5
+    quote: "A visitor visa should allow the applicant to stay in New Zealand for a total of no more than nine months in the 18-month period before the proposed expiry date of the visa."
+    condition: "days_in_nz_in_18_months_before_expiry <= 9 months (6 in 12 months for visa-waiver visitors granted at the border)"
+
+conditions:
+  - id: COND-VIS-NO-WORK
+    text: Visitors may not work or study (other than short-term study)
+    ref: V2.1
+    quote: "they are not intending to undertake employment (see W2.2.1) or a programme of study or training, with the exception of short-term study"
+  - id: COND-VIS-MAX-STAY
+    text: Maximum stay of nine months on a visitor visa (exceptions apply)
+    ref: V2.5
+    quote: "Visitors to New Zealand are limited to a maximum stay on a visitor visa of nine months"
+
+reference_lists:
+  - id: VISITOR_FUNDS
+    name: Visitor maintenance funds
+    ref: V2.20
+    rows:
+      - key: standard
+        value: 1000
+        unit: NZD per month
+        quote: "at least NZ$1000 per month for maintenance and accommodation"
+      - key: accommodation_prepaid
+        value: 400
+        unit: NZD per month
+        quote: "NZ$400 per month if the accommodation has been prepaid"
+      - key: maternity
+        value: 9000
+        unit: NZD
+        quote: "funds of at least NZ$9,000 available to pay for maternity related services"

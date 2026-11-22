@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rules assistant</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --ink: #1b1f24; --muted: #5b6470; --line: #dde1e6;
+    --accent: #0b5cad; --accent-ink: #ffffff; --quote: #f1f4f8;
+    --warn-bg: #fff4d6; --warn-ink: #6b4b00; --info-bg: #e6f0fb; --info-ink: #0b3d73;
+    --judge-bg: #fbe7ea; --judge-ink: #7a1a2a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14171b; --panel: #1c2026; --ink: #e8ebef; --muted: #a2abb6; --line: #2e343c;
+      --accent: #5aa2ec; --accent-ink: #0d1117; --quote: #232931;
+      --warn-bg: #3a2f10; --warn-ink: #f2d28a; --info-bg: #142a42; --info-ink: #a9cdf3;
+      --judge-bg: #3a1a20; --judge-ink: #f2b3bd;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { padding: 16px; border-bottom: 1px solid var(--line); background: var(--panel); }
+  header h1 { margin: 0; font-size: 18px; }
+  header p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+  main { max-width: 860px; margin: 0 auto; padding: 16px; padding-bottom: 140px; }
+  .turn { margin: 16px 0; }
+  .you { background: var(--accent); color: var(--accent-ink); padding: 10px 14px; border-radius: 12px; margin-left: auto; max-width: 85%; width: fit-content; white-space: pre-wrap; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-top: 8px; }
+  .reading { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 14px; color: var(--muted); margin-bottom: 8px; }
+  .reading strong { color: var(--ink); }
+  button { font: inherit; cursor: pointer; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 4px 10px; }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); padding: 8px 16px; }
+  .correct { display: none; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+  .correct.open { display: flex; }
+  select, input[type=date], textarea { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }
+  .labels { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+  .label { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--info-bg); color: var(--info-ink); }
+  .label.judge { background: var(--judge-bg); color: var(--judge-ink); }
+  .label.warn { background: var(--warn-bg); color: var(--warn-ink); }
+  .notice { background: var(--warn-bg); color: var(--warn-ink); border-radius: 8px; padding: 8px 10px; font-size: 14px; margin: 8px 0; }
+  .summary { white-space: pre-wrap; margin: 8px 0; }
+  .sources h3 { font-size: 14px; margin: 14px 0 6px; color: var(--muted); font-weight: 600; }
+  .source { border-top: 1px solid var(--line); padding: 10px 0; }
+  .source .meta { font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 12px; }
+  .source .meta a { color: var(--accent); }
+  blockquote { margin: 6px 0 0; padding: 8px 10px; background: var(--quote); border-left: 3px solid var(--accent); border-radius: 4px; font-size: 14px; overflow-wrap: anywhere; }
+  blockquote.long { max-height: 9em; overflow: hidden; position: relative; }
+  blockquote.long.open { max-height: none; }
+  details { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  form { position: fixed; left: 0; right: 0; bottom: 0; background: var(--panel); border-top: 1px solid var(--line); padding: 12px 16px; }
+  form .row { max-width: 860px; margin: 0 auto; display: flex; gap: 8px; }
+  textarea { flex: 1; min-height: 48px; resize: vertical; }
+  .hint { max-width: 860px; margin: 6px auto 0; font-size: 12px; color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Rules assistant</h1>
+  <p>Answers come only from the rules graph built from the public Operational Manual. Each answer shows the manual's exact wording, the instruction code and its effective date. Every chat is logged.</p>
+</header>
+<main id="log" aria-live="polite"></main>
+<form id="ask">
+  <div class="row">
+    <textarea id="q" placeholder="For example: What funds does a visitor need? Lodged 1 May 2026." aria-label="Your question"></textarea>
+    <button class="primary" type="submit">Ask</button>
+  </div>
+  <div class="hint">Say the lodgement date when rules may have changed. The assistant won't assume today's date.</div>
+</form>
+<script>
+const log = document.getElementById('log');
+let conversationId = null;
+let visaTypes = [];
+fetch('api/visa-types').then(r => r.json()).then(v => visaTypes = v);
+
+function el(tag, attrs = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') e.className = v; else if (k === 'text') e.textContent = v; else e.setAttribute(k, v);
+  }
+  for (const k of kids) if (k) e.append(k);
+  return e;
+}
+
+function fmtDate(d) {
+  if (!d) return '';
+  const [y, m, day] = d.slice(0, 10).split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, day)).toLocaleDateString('en-NZ', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+}
+
+async function send(payload, shown) {
+  const turn = el('div', { class: 'turn' });
+  if (shown) turn.append(el('div', { class: 'you', text: shown }));
+  const card = el('div', { class: 'card', text: 'Looking this up…' });
+  turn.append(card);
+  log.append(turn);
+  turn.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  try {
+    const res = await fetch('api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ conversation_id: conversationId, ...payload }) });
+    if (!res.ok) throw new Error((await res.json()).detail || res.statusText);
+    const a = await res.json();
+    conversationId = a.conversation_id;
+    render(card, a);
+  } catch (err) {
+    card.textContent = 'Something went wrong: ' + err.message + '. Check the manual directly.';
+  }
+}
+
+function render(card, a) {
+  card.textContent = '';
+  const reading = el('div', { class: 'reading' }, el('span', { text: 'How I read your question:' }),
+    el('strong', { text: a.interpretation_display || 'not recorded' }));
+  const fix = el('button', { type: 'button', text: 'Correct this' });
+  reading.append(fix);
+  card.append(reading);
+
+  const box = el('div', { class: 'correct' });
+  const sel = el('select', { 'aria-label': 'Visa type' }, el('option', { value: '', text: 'Visa type…' }));
+  for (const v of visaTypes) sel.append(el('option', { value: v.code, text: v.name }));
+  if (a.interpretation && a.interpretation.visa_type && a.interpretation.visa_type !== 'NONE') sel.value = a.interpretation.visa_type;
+  const date = el('input', { type: 'date', 'aria-label': 'Lodgement date' });
+  if (a.interpretation && a.interpretation.date_verified) date.value = a.interpretation.date;
+  const go = el('button', { type: 'button', class: 'primary', text: 'Ask again' });
+  go.onclick = () => send({ message: '', correction: { visa_type: sel.value || null, date: date.value || null } },
+    'Correction: ' + [sel.selectedOptions[0]?.value ? sel.selectedOptions[0].text : '', date.value ? 'lodged ' + fmtDate(date.value) : ''].filter(Boolean).join(', '));
+  box.append(sel, date, go);
+  fix.onclick = () => box.classList.toggle('open');
+  card.append(box);
+
+  if (a.labels && a.labels.length) {
+    const labels = el('div', { class: 'labels' });
+    for (const l of a.labels) {
+      const cls = l === 'Officer judgement' || l === 'Person-only decision' ? 'label judge' : (l.startsWith('Rule awaiting') || l.startsWith('From manual') ? 'label warn' : 'label');
+      labels.append(el('span', { class: cls, text: l }));
+    }
+    card.append(labels);
+  }
+  for (const n of a.notices || []) card.append(el('div', { class: 'notice', text: n }));
+  card.append(el('div', { class: 'summary', text: a.text }));
+
+  if (a.sources && a.sources.length) {
+    const wrap = el('div', { class: 'sources' }, el('h3', { text: 'What the manual says' }));
+    for (const s of a.sources) {
+      const meta = el('div', { class: 'meta' },
+        el('strong', { text: s.ref }),
+        s.title ? el('span', { text: s.title }) : null,
+        el('span', { text: s.effectiveFrom ? 'Effective ' + fmtDate(s.effectiveFrom) + (s.effectiveTo ? ' to ' + fmtDate(s.effectiveTo) : '') : 'Effective date not stated' }),
+        s.officerJudgement ? el('span', { text: 'Officer judgement' }) : null,
+        s.status === 'under_review' ? el('span', { text: 'Awaiting steward approval' }) : null,
+        s.url ? el('a', { href: s.url, target: '_blank', rel: 'noopener', text: 'Open in manual' }) : null);
+      const q = el('blockquote', { text: s.verbatimText });
+      const item = el('div', { class: 'source' }, meta, q);
+      if (s.verbatimText.length > 600) {
+        q.classList.add('long');
+        const more = el('button', { type: 'button', text: 'Show all' });
+        more.onclick = () => { q.classList.toggle('open'); more.textContent = q.classList.contains('open') ? 'Show less' : 'Show all'; };
+        item.append(more);
+      }
+      wrap.append(item);
+    }
+    card.append(wrap);
+  } else if (a.kind === 'no_answer') {
+    card.append(el('a', { href: a.manual_link, target: '_blank', rel: 'noopener', text: 'Open the Operational Manual' }));
+  }
+  const d = el('details', {}, el('summary', { text: 'Queries run' + (a.manual_as_at ? ' · manual as at ' + fmtDate(a.manual_as_at) : '') }));
+  for (const q of a.queries || []) d.append(el('div', { text: `${q.id} ${JSON.stringify(q.params)} → ${q.rows} result(s)` }));
+  card.append(d);
+}
+
+document.getElementById('ask').addEventListener('submit', e => {
+  e.preventDefault();
+  const q = document.getElementById('q');
+  const text = q.value.trim();
+  if (!text) return;
+  q.value = '';
+  send({ message: text }, text);
+});
+document.getElementById('q').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('ask').requestSubmit(); }
+});
+</script>
+</body>
+</html>
