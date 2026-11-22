@@ -18,8 +18,8 @@ class Settings:
     # A separate read-only account for the chat assistant and query API. On Neo4j
     # Enterprise or Aura give this user the built-in "reader" role. On Community Edition
     # (no roles) the app still opens read-only sessions and checks every query plan.
-    neo4j_reader_user: str = os.getenv("NEO4J_READER_USER", os.getenv("NEO4J_USER", "neo4j"))
-    neo4j_reader_password: str = os.getenv("NEO4J_READER_PASSWORD", os.getenv("NEO4J_PASSWORD", "localdevpassword"))
+    neo4j_reader_user: str = os.getenv("NEO4J_READER_USER") or os.getenv("NEO4J_USER", "neo4j")
+    neo4j_reader_password: str = os.getenv("NEO4J_READER_PASSWORD") or os.getenv("NEO4J_PASSWORD", "localdevpassword")
 
     snapshot_path: Path = Path(os.getenv("INZKG_SNAPSHOT", str(ROOT / "data" / "snapshots" / "opsmanual-2026-11-22.json.gz")))
     rules_dir: Path = Path(os.getenv("INZKG_RULES_DIR", str(ROOT / "rules")))
