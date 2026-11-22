@@ -1,0 +1,141 @@
+# Fee Paying Student Visa (U3, U4.10). Worked example 2 in schema v1.
+stewardship:
+  prepared_by: build-team
+  approved_by: null
+  approved_on: null
+
+evidence_types:
+  - id: EV-OFFER-OF-PLACE
+    name: Offer of place (or confirmation of enrolment) from a New Zealand education provider
+  - id: EV-FEE-RECEIPT
+    name: Evidence of full payment of tuition fees
+  - id: EV-PROVIDER-ACCOM-STATEMENT
+    name: Education provider statement that accommodation complies with the Pastoral Care Code 2021
+  - id: EV-SCHOLARSHIP
+    name: Notice of the award of a full scholarship
+  - id: EV-FINANCIAL-UNDERTAKING-INZ1014
+    name: Financial Undertaking for a Student (INZ 1014)
+  - id: EV-OWN-FUNDS
+    name: Funds held by or on behalf of the student
+  - id: EV-INSURANCE-DECLARATION
+    name: Declaration that the student will arrange and hold compliant insurance
+
+groups:
+  - id: FPS-ROOT
+    title: Fee paying student visa requirements
+    operator: ALL
+    ref: U3.1
+    members: [FPS-OFFER, FPS-FEES, FPS-ACCOM-U18, FPS-FUNDS, FPS-SPONSOR-BONAFIDE, FPS-OUTWARD-TRAVEL, FPS-INSURANCE, FPS-NO-MEDICALS]
+  - id: FPS-FUNDS
+    title: Living funds (one of the two rates, by programme length)
+    operator: ANY
+    members: [FPS-FUNDS-36PLUS, FPS-FUNDS-UNDER36]
+
+criteria:
+  - id: FPS-OFFER
+    title: Offer of a place from a New Zealand education provider
+    kind: evidential
+    ref: U3.5
+    quote: "Applicants must have an offer of a place with a New Zealand education provider"
+    evidence: [EV-OFFER-OF-PLACE]
+
+  - id: FPS-FEES
+    title: Tuition fees paid for one year or one programme, whichever is shorter
+    kind: evidential
+    ref: U3.10
+    quote: "Applicants must provide evidence of full payment of tuition fees for one year or one programme, whichever is shorter."
+    evidence: [EV-FEE-RECEIPT]
+    factors:
+      - ref: U3.10
+        quote: "For applicants living outside New Zealand, evidence of payment is not required until after the application has been approved in principle."
+
+  - id: FPS-ACCOM-U18
+    title: Under 18, provider confirms accommodation complies with the Pastoral Care Code 2021
+    kind: evidential
+    ref: U3.15
+    quote: "Fee-paying foreign students who are under the age of 18 must provide, with their student visa application, a statement from their education provider confirming that the student's accommodation is compliant with the Education (Pastoral Care of Tertiary and International Learners) Code of Practice 2021."
+    condition: "age_at_lodgement < 18 -> provider_accommodation_statement"
+    evidence: [EV-PROVIDER-ACCOM-STATEMENT]
+
+  - id: FPS-FUNDS-36PLUS
+    title: Programme of 36 weeks or more, NZ$20,000 a year (tertiary) or NZ$17,000 a year (school)
+    kind: objective
+    ref: U3.20
+    quote: "they have NZ$20,000.00 per year available to maintain themselves during their stay in New Zealand (less prepaid living expenses) if they are undertaking tertiary or non-compulsory education study; or they have NZ$17,000.00 per year available to maintain themselves during their stay in New Zealand (less prepaid living expenses) if they are undertaking compulsory education study"
+    condition: "programme_weeks >= 36 -> funds_per_year >= (20000 if tertiary else 17000)"
+    uses_list: [STUDENT_FUNDS]
+    evidence: [EV-SCHOLARSHIP, EV-SPONSOR-FORM, EV-FINANCIAL-UNDERTAKING-INZ1014, EV-OWN-FUNDS]
+
+  - id: FPS-FUNDS-UNDER36
+    title: Programme under 36 weeks, NZ$1,667 a month (tertiary) or NZ$1,417 a month (school)
+    kind: objective
+    ref: U3.20
+    quote: "at least NZ$1,667 per month of study available to maintain themselves during their stay in New Zealand (less prepaid living expenses) if they are undertaking tertiary or non-compulsory education study"
+    condition: "programme_weeks < 36 -> funds_per_month >= (1667 if tertiary else 1417)"
+    uses_list: [STUDENT_FUNDS]
+    evidence: [EV-SCHOLARSHIP, EV-SPONSOR-FORM, EV-FINANCIAL-UNDERTAKING-INZ1014, EV-OWN-FUNDS]
+
+  - id: FPS-SPONSOR-BONAFIDE
+    title: Sponsor or financial undertaker is bona fide and holds the funds
+    kind: discretionary
+    ref: U3.20
+    quote: "Sponsors must satisfy an immigration officer that they: are bona fide (i.e. are genuinely intending to meet sponsorship obligations); and genuinely hold sufficient funds for each student they are sponsoring."
+    factors:
+      - ref: U3.20
+        quote: "To determine whether a sponsor or third party providing a financial undertaking is bona fide, immigration officers may consider"
+
+  - id: FPS-OUTWARD-TRAVEL
+    title: Means to travel to a country of right of entry
+    kind: evidential
+    ref: U3.25
+    quote: "Applicants for student visas are required to provide evidence that they have the means while their visa is current to travel to a country to which they have right of entry"
+    evidence: [EV-TICKET, EV-SPONSOR-FORM]
+
+  - id: FPS-INSURANCE
+    title: Declaration of compliant insurance (not PhD or MFAT scholarship students)
+    kind: evidential
+    ref: U3.45
+    quote: "A fee-paying foreign student must declare that they will arrange and hold insurance, which complies with the insurance requirements of the Education (Pastoral Care of Tertiary and International Learners) Code of Practice 2021"
+    evidence: [EV-INSURANCE-DECLARATION]
+
+  - id: FPS-NO-MEDICALS
+    title: No medical or X-ray certificates needed (MFAT scholarship holders excepted)
+    kind: objective
+    ref: A4.25
+    quote: "Applicants for a student visa as a fee paying foreign student (see U4.10) (except for students holding a New Zealand scholarship administered by the Ministry of Foreign Affairs and Trade (see U11)"
+
+conditions:
+  - id: COND-FPS-STUDY
+    text: Attend the programme at the place of study endorsed on the visa
+    ref: E3.20
+    quote: "The holder attends the programme of study at all times as required, at the place of study endorsed on the visa, unless there are genuine reasons for absences"
+  - id: COND-FPS-WORK-25
+    text: Work up to 25 hours in any week, only for qualifying full-time study
+    ref: U13.15
+    quote: "A student visa holder may be granted with conditions to work for up to 25 hours in any given week during the validity of the visa if the student is"
+  - id: COND-FPS-INSURANCE
+    text: Hold insurance as a condition of the visa
+    ref: U3.45
+    quote: "Fee-paying foreign students must hold insurance as a condition of their visa"
+
+reference_lists:
+  - id: STUDENT_FUNDS
+    name: Student maintenance funds
+    ref: U3.20
+    rows:
+      - key: tertiary_per_year
+        value: 20000
+        unit: NZD per year
+        quote: "NZ$20,000.00 per year available to maintain themselves"
+      - key: school_per_year
+        value: 17000
+        unit: NZD per year
+        quote: "NZ$17,000.00 per year available to maintain themselves"
+      - key: tertiary_per_month_under_36_weeks
+        value: 1667
+        unit: NZD per month
+        quote: "at least NZ$1,667 per month of study"
+      - key: school_per_month_under_36_weeks
+        value: 1417
+        unit: NZD per month
+        quote: "at least NZ$1,417 per month of study"

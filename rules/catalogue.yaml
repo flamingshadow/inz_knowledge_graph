@@ -1,0 +1,92 @@
+# Visa classes, categories and the fixed list of visa types staff can ask about.
+# The chat assistant may only use the codes listed under visa_types.
+#
+# Every rule file carries a stewardship block. A rule only counts as approved when a
+# rule steward other than the person who prepared it has approved it against the manual
+# page (four-eyes check, safeguards guide section "Audit trails and versioning").
+stewardship:
+  prepared_by: build-team
+  approved_by: null   # to be filled in by the INZ rule steward for each category
+  approved_on: null
+
+legal_sources:
+  - id: IA2009-s22
+    name: Immigration Act 2009
+    section: "s 22"
+    url: https://www.legislation.govt.nz/act/public/2009/0051/latest/DLM1440610.html
+  - id: IA2009-s25
+    name: Immigration Act 2009
+    section: "s 25"
+    url: https://www.legislation.govt.nz/act/public/2009/0051/latest/DLM1440613.html
+  - id: IA2009-s28
+    name: Immigration Act 2009
+    section: "s 28"
+    url: https://www.legislation.govt.nz/act/public/2009/0051/latest/DLM1440619.html
+
+visa_classes:
+  - code: TEMPORARY
+    name: Temporary Entry
+    lodgement_rule:
+      ref: E7.10
+      quote: "the temporary entry instructions in force at the time the application is made"
+  - code: RESIDENCE
+    name: Residence
+    lodgement_rule:
+      ref: R5.1
+      quote: "residence instructions applying at the time the application is made"
+
+visa_categories:
+  - code: VISITOR
+    name: Visitor
+    class: TEMPORARY
+    manual_ref: V2
+  - code: STUDENT
+    name: Student
+    class: TEMPORARY
+    manual_ref: U3
+  - code: SKILLED_MIGRANT
+    name: Skilled Migrant
+    class: RESIDENCE
+    manual_ref: SR3
+
+visa_types:
+  - code: VISITOR
+    name: Visitor Visa
+    category: VISITOR
+    instruction_ref: V2
+    governed_by: [V2.1, V2.5, V2.20, V2.25, E4.1, E5.1, A4.15, A4.25, A5.1, A5.10]
+    requires: VIS-ROOT
+    inherits_generic: [GEN-TEMP]
+    conditions: [COND-VIS-NO-WORK, COND-VIS-MAX-STAY]
+    pathway_to: []
+    automation:
+      a21_listed: true
+      ref: A21
+      quote: "determine that requirements are met and grant a visitor visa (V2 or V3)"
+      note: >-
+        A21 allows an automated system to grant (never to decline) a visitor visa.
+        Phase one is recommend-only; automated grants come later and only for tier 1 passes.
+  - code: FEE_PAYING_STUDENT
+    name: Fee Paying Student Visa
+    category: STUDENT
+    instruction_ref: U3
+    governed_by: [U3.1, U3.5, U3.10, U3.15, U3.20, U3.25, U3.45, U13.15, E3.20, A4.25, A5.10]
+    requires: FPS-ROOT
+    inherits_generic: [GEN-TEMP]
+    conditions: [COND-FPS-STUDY, COND-FPS-WORK-25, COND-FPS-INSURANCE]
+    pathway_to: []
+    automation:
+      a21_listed: false
+      note: A21 does not list student visas, so every grant needs an officer.
+  - code: SMC_RESIDENT
+    name: Skilled Migrant Category Resident Visa
+    category: SKILLED_MIGRANT
+    instruction_ref: SR3
+    governed_by: [SR2.10, SR3.10, SR3.15, SR3.20, SR3.25, SR3.35, SR3.40, A4.10, A5.1, R5.1]
+    requires: SMC-ROOT
+    inherits_generic: [GEN-RES]
+    conditions: []
+    pathway_to: []
+    automation:
+      a21_listed: false
+      note: A21 does not list Skilled Migrant Category resident visas, so every grant needs an officer.

@@ -1,0 +1,261 @@
+# Border Entry (Y), Compliance and deportation (D) and appeals (D3, R5.55.5).
+# These are rules about powers and consequences. Every decision they describe is tier 3
+# (person only): the assistant shows rule text and citations and never recommends.
+#
+# modality: must | must_unless_exception | may
+stewardship:
+  prepared_by: build-team
+  approved_by: null
+  approved_on: null
+
+entry_permission:
+  id: ENTRY-PERMISSION
+  ref: Y3.1
+  quote: "The grant of entry permission has no effect unless the person also holds a visa."
+
+entry_refusal_grounds:
+  - id: Y-EXCLUDED
+    title: Excluded persons (Act s 15 and 16)
+    modality: must
+    ref: Y4.1
+    quote: "Under section 15 and 16, entry permission must be refused to any person, except a person listed in Y3.10(a)"
+    uses_criteria: [GEN-CHARACTER]
+  - id: Y-CHARACTER
+    title: General character concerns
+    modality: must_unless_exception
+    ref: Y4.5
+    quote: "Entry permission must be refused to any person, except a person listed in Y3.10(a), who is not otherwise dealt with under Y4.1 and; is arrested on arrival in New Zealand"
+    uses_criteria: [GEN-CHARACTER]
+  - id: Y-COMPLIANCE
+    title: Circumstances and compliance concerns (for example a false declaration)
+    modality: must_unless_exception
+    ref: Y4.15
+    quote: "makes a false declaration on any part of the New Zealand Traveller Declaration or Crew Declaration"
+  - id: Y-STOWAWAY
+    title: Stowaways
+    modality: must_unless_exception
+    ref: Y4.20
+    quote: "Entry permission must be refused to any person who is a stowaway and is not otherwise dealt with under Y4.1."
+  - id: Y-CANNOT-MEET
+    title: Unable to meet relevant immigration instructions
+    modality: must_unless_exception
+    ref: Y4.25
+    quote: "is unable to meet the requirements for entry permission or a visa under relevant instructions"
+  - id: Y-TRANSIT
+    title: Holders of transit visas
+    modality: must
+    ref: Y4.30
+    quote: "Holders of transit visas are not entitled to apply for entry permission or any other class or type of visa while in New Zealand during the transit period."
+  - id: Y-CONCEALMENT
+    title: Concealment of relevant information, including changed circumstances
+    modality: may
+    ref: Y4.35
+    quote: "An immigration officer may refuse to grant entry permission to a person, if satisfied that the person"
+  - id: Y-BIOMETRICS
+    title: Not supplying biometric information
+    modality: may
+    ref: Y4.40
+    quote: "must allow biometric information to be collected from him or her if required to do so by an immigration officer"
+
+tribunal:
+  id: IPT
+  name: Immigration and Protection Tribunal
+  ref: D3.1
+  quote: "The Immigration and Protection Tribunal (Tribunal) has been established under the Immigration Act 2009 to consider appeals against decisions made under that Act, liability for deportation"
+
+liability_grounds:
+  - id: S154
+    title: Unlawfully in New Zealand
+    act_section: "s 154"
+    applies_to: [TEMPORARY, RESIDENCE]
+    ref: D2.10
+    quote: "No one other than a New Zealand citizen may be in New Zealand unless that person holds (or is deemed to hold) a current visa granted or deemed to have been granted under the Immigration Act 2009."
+    period: PERIOD-UNLAWFUL
+    prohibitions: [PROHIB-S154-UNDER-12M, PROHIB-S154-12M-PLUS, PROHIB-S154-REPEAT]
+    appeals: [APPEAL-S154]
+  - id: S155
+    title: Visa granted as a result of an administrative error
+    act_section: "s 155"
+    applies_to: [TEMPORARY, RESIDENCE]
+    ref: D2.15
+    quote: "their visa was granted as a result of an administrative error; and the visa was not cancelled under section 67 of the Immigration Act 2009; and no visa was granted under section 68 of the Immigration Act 2009."
+    prohibitions: [PROHIB-S155]
+    appeals: [APPEAL-S155]
+  - id: S157
+    title: Temporary entry class visa holder liable for cause
+    act_section: "s 157"
+    applies_to: [TEMPORARY]
+    ref: D3.30
+    quote: "A person who is liable for deportation under section 157 of the Immigration Act 2009 has 14 days from the date of service of the deportation liability notice to give good reason why deportation should not proceed."
+    prohibitions: [PROHIB-S157]
+    appeals: [APPEAL-S157]
+  - id: S158
+    title: Residence class visa or citizenship obtained by fraud, forgery and similar
+    act_section: "s 158"
+    applies_to: [RESIDENCE]
+    ref: D3.35
+    quote: "A person liable for deportation under section 158 of the Immigration Act 2009 may, not later than 28 days after the date of service of a deportation liability notice, appeal to the Tribunal"
+    period: PERIOD-RESIDENCE
+    prohibitions: [PROHIB-PERMANENT-S158]
+    appeals: [APPEAL-S158]
+  - id: S159
+    title: Resident visa conditions breached
+    act_section: "s 159"
+    applies_to: [RESIDENCE]
+    ref: D3.40
+    quote: "A person liable for deportation under section 159 of the Immigration Act 2009 may, not later than 28 days after the date of service of a deportation liability notice, appeal to the Tribunal both on the facts and on humanitarian grounds."
+    period: PERIOD-RESIDENCE
+    prohibitions: [PROHIB-S159]
+    appeals: [APPEAL-S159]
+  - id: S160
+    title: New information as to character becomes available
+    act_section: "s 160"
+    applies_to: [RESIDENCE]
+    ref: D3.45
+    quote: "A person liable for deportation under section 160 of the Immigration Act 2009 may, not later than 28 days after the date of service of a deportation liability notice, appeal to the Tribunal both on the facts and on humanitarian grounds."
+    period: PERIOD-RESIDENCE
+    prohibitions: [PROHIB-PERMANENT-S160]
+    appeals: [APPEAL-S160]
+  - id: S161
+    title: Residence class visa holder convicted of a criminal offence
+    act_section: "s 161"
+    applies_to: [RESIDENCE]
+    ref: D3.50
+    quote: "A person liable for deportation under section 161 of the Immigration Act 2009 may, not later than 28 days after being served with a deportation liability notice, appeal to the Tribunal"
+    period: PERIOD-RESIDENCE
+    prohibitions: [PROHIB-PERMANENT-S161]
+    appeals: [APPEAL-S161]
+
+liability_periods:
+  - id: PERIOD-RESIDENCE
+    ref: D2.30
+    duration: 10 years, excluding time in prison after conviction and any suspension
+    quote: "Residence class visa holders remain liable for deportation for a period of 10 years following the arising of the liability for deportation."
+  - id: PERIOD-UNLAWFUL
+    ref: D2.30
+    duration: as long as the person is unlawfully in New Zealand
+    quote: "remains liable for deportation as long as he or she is unlawfully in New Zealand"
+
+appeal_rights:
+  - id: APPEAL-S154
+    title: Humanitarian appeal against liability, person unlawfully in New Zealand
+    appeal_type: humanitarian
+    time_limit_days: 42
+    time_limit_from: the day the person first became unlawful (or later confirmation of a declined reconsideration)
+    ref: D3.15
+    quote: "A person who is unlawfully in New Zealand may appeal to the Tribunal on humanitarian grounds against liability for deportation, no later than 42 days after first becoming unlawful."
+    tested_by: APPEAL-HUMANITARIAN-TEST
+  - id: APPEAL-S155
+    title: Appeal against liability, visa granted in error
+    appeal_type: facts and humanitarian (depends on visa held)
+    time_limit_days: 28
+    time_limit_from: date of service of the deportation liability notice
+    ref: D3.20
+    quote: "A person whose visa is cancelled as a result of an administrative error may appeal to the Tribunal not later than 28 days after the date of service of a deportation liability notice"
+  - id: APPEAL-S157
+    title: Humanitarian appeal, temporary visa holder liable for cause
+    appeal_type: humanitarian
+    time_limit_days: 28
+    time_limit_from: date of service of the deportation liability notice
+    ref: D3.30
+    quote: "The person may, not later than 28 days after the date of service of the Deportation Liability Notice, appeal to the Tribunal on humanitarian grounds against their liability for deportation."
+    tested_by: APPEAL-HUMANITARIAN-TEST
+  - id: APPEAL-S158
+    title: Appeal against liability, fraud or forgery (grounds depend on how established)
+    appeal_type: humanitarian, or facts and humanitarian
+    time_limit_days: 28
+    time_limit_from: date of service of the deportation liability notice
+    ref: D3.35
+    quote: "may, not later than 28 days after the date of service of a deportation liability notice, appeal to the Tribunal"
+  - id: APPEAL-S159
+    title: Appeal on the facts and humanitarian grounds, resident visa conditions breached
+    appeal_type: facts and humanitarian
+    time_limit_days: 28
+    time_limit_from: date of service of the deportation liability notice
+    ref: D3.40
+    quote: "appeal to the Tribunal both on the facts and on humanitarian grounds"
+    tested_by: APPEAL-HUMANITARIAN-TEST
+  - id: APPEAL-S160
+    title: Appeal on the facts and humanitarian grounds, new character information
+    appeal_type: facts and humanitarian
+    time_limit_days: 28
+    time_limit_from: date of service of the deportation liability notice
+    ref: D3.45
+    quote: "appeal to the Tribunal both on the facts and on humanitarian grounds"
+    tested_by: APPEAL-HUMANITARIAN-TEST
+  - id: APPEAL-S161
+    title: Humanitarian appeal, residence class visa holder convicted of an offence
+    appeal_type: humanitarian
+    time_limit_days: 28
+    time_limit_from: date of being served with the deportation liability notice
+    ref: D3.50
+    quote: "not later than 28 days after being served with a deportation liability notice, appeal to the Tribunal: on humanitarian grounds"
+    tested_by: APPEAL-HUMANITARIAN-TEST
+  - id: APPEAL-RES-DECLINE
+    title: Appeal against the decline of a residence class visa application
+    appeal_type: residence decline appeal
+    time_limit_days: 42
+    time_limit_from: the date the applicant is deemed to have received the decline letter
+    decision_type: RESIDENCE_DECLINE
+    ref: R5.55
+    quote: "Appeals must be lodged within 42 days after the date that an applicant is deemed to have received a letter advising that an application for a residence class visa has been declined."
+
+no_appeal_rules:
+  - id: NOAPPEAL-LIMITED
+    title: Holders of limited visas have no right of appeal
+    ref: D3.10
+    quote: "The holder of a limited visa has no right of appeal to the Tribunal either: during the period that they are the holder of the visa; or after the limited visa expires, if they have not been granted a visa of another class or type."
+    bars: [APPEAL-S154, APPEAL-S155, APPEAL-S157]
+  - id: NOAPPEAL-S15-16-RES
+    title: No appeal for residence declines where sections 15 or 16 apply
+    ref: R5.55
+    quote: "There is no right of appeal to the Immigration and Protection Tribunal for applicants who have been declined on the basis that sections 15 or 16 apply to them"
+    bars: [APPEAL-RES-DECLINE]
+
+prohibitions:
+  - {id: PROHIB-S155, ground: S155, years: 0, condition: "none", ref: D2.45, quote: "granted a visa as the result of an administrative error and visa not cancelled) none"}
+  - {id: PROHIB-S154-UNDER-12M, ground: S154, years: 2, condition: "deported not more than 12 months after becoming unlawful", ref: D2.45, quote: "deported not more than 12 months after date on which person became unlawfully in New Zealand 2 years"}
+  - {id: PROHIB-S154-12M-PLUS, ground: S154, years: 5, condition: "deported 12 months or more after becoming unlawful", ref: D2.45, quote: "deported 12 months or more after date on which person became unlawfully in New Zealand 5 years"}
+  - {id: PROHIB-S154-REPEAT, ground: S154, years: 5, condition: "second or subsequent time unlawfully in New Zealand", ref: D2.45, quote: "it is second or subsequent time that person has been unlawfully in New Zealand 5 years"}
+  - {id: PROHIB-S157, ground: S157, years: 5, condition: "deported under s 157", ref: D2.45, quote: "sufficient reasons for temporary entry class visa holder to be deported) 5 years"}
+  - {id: PROHIB-S159, ground: S159, years: 5, condition: "deported under s 159", ref: D2.45, quote: "breached resident visa conditions) 5 years"}
+  - {id: PROHIB-PERMANENT-S158, ground: S158, years: null, permanent: true, condition: "deported under s 158", ref: D2.45, quote: "fraud, forgery, etc in relation to an application) Permanent prohibition"}
+  - {id: PROHIB-PERMANENT-S160, ground: S160, years: null, permanent: true, condition: "deported under s 160", ref: D2.45, quote: "new information as to character becomes available) Permanent prohibition"}
+  - {id: PROHIB-PERMANENT-S161, ground: S161, years: null, permanent: true, condition: "deported under s 161", ref: D2.45, quote: "residence class visa holder convicted of specified offence) Permanent prohibition"}
+
+humanitarian_test:
+  group:
+    id: APPEAL-HUMANITARIAN-TEST
+    title: Humanitarian appeal test (Tribunal decides; always discretionary)
+    operator: ALL
+    ref: D3.65
+    members: [HUM-EXCEPTIONAL, HUM-PUBLIC-INTEREST]
+  criteria:
+    - id: HUM-EXCEPTIONAL
+      title: Exceptional humanitarian circumstances making deportation unjust or unduly harsh
+      kind: discretionary
+      tier: 3
+      ref: D3.65
+      quote: "there are exceptional circumstances of a humanitarian nature that would make it unjust or unduly harsh for the appellant to be deported from New Zealand"
+    - id: HUM-PUBLIC-INTEREST
+      title: Not contrary to the public interest to let the appellant remain
+      kind: discretionary
+      tier: 3
+      ref: D3.65
+      quote: "it would not in all the circumstances be contrary to the public interest to allow the appellant to remain in New Zealand"
+
+powers:
+  - id: POWER-DETAIN-4H
+    title: Limited power of detention for up to 4 hours (immigration officer)
+    holder: authorised immigration officer
+    max_duration: 4 hours
+    ref: D4.11
+    quote: "may be detained by an immigration officer authorised under section 388(2) of the Act"
+    exercised_for: [S154, S155, S157]
+  - id: POWER-DETAIN-96H
+    title: Arrest and detention for up to 96 hours without a warrant (constable)
+    holder: constable
+    max_duration: 96 hours
+    ref: D4.15
+    quote: "a constable may, and if requested by an immigration officer must, arrest the person without warrant and place them in custody"
+    exercised_for: [S154, S155, S157, S158, S159, S160, S161]

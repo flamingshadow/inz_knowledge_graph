@@ -1,0 +1,81 @@
+# Golden questions: what an officer might ask, the approved query that should answer it,
+# and what the answer must contain. `tests/test_queries_graph.py` runs each query against
+# the loaded graph. The `question` text is also the starting set for a live evaluation of
+# the chat assistant (which query it picks and with what values).
+#
+#   expect_refs     instruction codes that must appear in the answer's citations
+#   forbid_refs     codes that must NOT appear (e.g. a version not in force on that date)
+#   min_rows        at least this many rows
+#   expect          field: value pairs that must hold on the first row
+
+- question: What does a visitor visa applicant need to meet if they lodged on 1 September 2026?
+  query: visa_requirements
+  args: {visa_type: VISITOR, lodged_on: "2026-09-01"}
+  expect_refs: [V2.1, V2.20, E4.1, E5.1, A4.15, A5.1]
+  min_rows: 8
+
+- question: What are the Skilled Migrant requirements for an application lodged 1/9/2026?
+  query: visa_requirements
+  args: {visa_type: SMC_RESIDENT, lodged_on: "2026-09-01"}
+  expect_refs: [SR3.10, SR3.15, A4.10]
+  forbid_refs: [SR3.20]
+
+- question: Which Skilled Migrant rules applied to an application lodged on 1 August 2026, before the three pathways?
+  query: visa_requirements
+  args: {visa_type: SMC_RESIDENT, lodged_on: "2026-08-01"}
+  expect_refs: [SR3.20, A4.10]
+  forbid_refs: [SR3.15]
+
+- question: What was the SMC wage threshold on 1 September 2026?
+  query: smc_wage_threshold
+  args: {as_at: "2026-09-01"}
+  expect_refs: [SR3.10]
+  expect: {from: "2026-03-09"}
+
+- question: Which instructions apply to a residence application, the ones at lodgement or at decision?
+  query: lodgement_rule
+  args: {visa_class: RESIDENCE}
+  expect_refs: [R5.1]
+
+- question: How long does someone unlawfully in New Zealand have to appeal on humanitarian grounds?
+  query: appeal_rights
+  args: {ground: S154}
+  expect_refs: [D3.65]
+
+- question: Can the system grant a visitor visa automatically?
+  query: automation_eligibility
+  args: {visa_type: VISITOR}
+  expect_refs: [A21]
+  expect: {a21AllowsAutomatedGrant: true}
+
+- question: Can the system grant a Skilled Migrant visa automatically?
+  query: automation_eligibility
+  args: {visa_type: SMC_RESIDENT}
+  expect: {a21AllowsAutomatedGrant: false}
+
+- question: Which visitor visa rules need an officer's judgement (lodged 1 September 2026)?
+  query: officer_judgement_rules
+  args: {visa_type: VISITOR, lodged_on: "2026-09-01"}
+  expect_refs: [E5.1, A5.1]
+
+- question: What does the manual say about maternity services, as at 1 September 2026?
+  query: search_manual_text
+  args: {text: maternity services, as_at: "2026-09-01"}
+  expect_refs: [V2.20.5]
+
+- question: What did SR3.15 say on 1 September 2026?
+  query: instruction_in_force
+  args: {ref: SR3.15, as_at: "2026-09-01"}
+  expect_refs: [SR3.15]
+
+- question: How much money does a visitor need to show?
+  query: funds_amounts
+  args: {list_id: VISITOR_FUNDS}
+  expect_refs: [V2.20]
+  min_rows: 2
+
+- question: Which instructions changed in August 2026?
+  query: instructions_changed
+  args: {since: "2026-08-01", until: "2026-09-01"}
+  expect_refs: [A4.10]
+  min_rows: 10

@@ -1,0 +1,98 @@
+# Generic requirements modelled once and inherited by every visa type in a class
+# (schema v1, design principle "Generic rules are shared").
+#
+# kind:  objective     a test on a number, date or list (tier 1: check and recommend)
+#        evidential    a document present and valid       (tier 1)
+#        discretionary the officer must be "satisfied" or weigh circumstances
+#                      (tier 2: assist only; the assistant labels it "Officer judgement")
+stewardship:
+  prepared_by: build-team
+  approved_by: null
+  approved_on: null
+
+evidence_types:
+  - id: EV-PASSPORT
+    name: Passport or travel document
+  - id: EV-APP-FORM
+    name: Completed application form
+  - id: EV-MEDICAL-INZ1007
+    name: General Medical Certificate (INZ 1007)
+  - id: EV-XRAY-INZ1096
+    name: Chest X-ray Certificate (INZ 1096)
+  - id: EV-POLICE-CERT
+    name: Police certificate
+    validity: less than six months old at lodgement (A5.10)
+  - id: EV-GENUINE-INTENT
+    name: Evidence of genuine intent and lawful purpose (itinerary, employment letter, home ties)
+
+groups:
+  - id: GEN-TEMP
+    title: Generic temporary entry requirements (lodgement, bona fides, health, character)
+    operator: ALL
+    members: [GEN-TEMP-LODGE, GEN-TEMP-BONAFIDE, GEN-TEMP-HEALTH, GEN-TEMP-MEDICALS, GEN-CHARACTER, GEN-POLICE-CERT]
+  - id: GEN-RES
+    title: Generic residence requirements (health and character)
+    operator: ALL
+    members: [GEN-RES-HEALTH, GEN-CHARACTER, GEN-POLICE-CERT]
+
+criteria:
+  - id: GEN-TEMP-LODGE
+    title: Each principal applicant lodges a separate application
+    kind: evidential
+    ref: E4.1
+    quote: "Each principal applicant must lodge a separate application."
+    evidence: [EV-APP-FORM, EV-PASSPORT]
+
+  - id: GEN-TEMP-BONAFIDE
+    title: Bona fide applicant (genuine temporary stay for a lawful purpose)
+    kind: discretionary
+    ref: E5.1
+    quote: "A bona fide applicant for temporary entry is a person who: genuinely intends a temporary stay in New Zealand for a lawful purpose; and in the opinion of an immigration officer is not likely: to remain in New Zealand unlawfully; or to breach the conditions of any visa granted; or to be unable to leave or be deported from New Zealand (see E5.10)."
+    evidence: [EV-GENUINE-INTENT]
+    factors:
+      - ref: E5.10
+        quote: "any evidence of genuine intent and lawful purpose submitted by the applicant (see E5.5.1)"
+
+  - id: GEN-TEMP-HEALTH
+    title: Acceptable standard of health (temporary entry)
+    kind: discretionary
+    ref: A4.15
+    quote: "Applicants for temporary entry class visas must have an acceptable standard of health, unless they have been granted a visitor visa for the purpose of obtaining medical treatment (see V3.40) or have been granted a medical waiver (see A4.65)."
+    factors:
+      - ref: A4.15
+        quote: "unlikely to be a danger to public health"
+      - ref: A4.15
+        quote: "unlikely to impose significant costs or demands on New Zealand's health services"
+
+  - id: GEN-TEMP-MEDICALS
+    title: Medical and chest X-ray certificates if the intended stay is more than 12 months
+    kind: objective
+    ref: A4.25
+    quote: "Applications for temporary entry class visas from applicants intending a stay in New Zealand of more than 12 months must include a completed Medical Certificate and a Chest X-ray Certificate (see A4.25(k)) which have been issued less than three months before the date the application is made"
+    condition: "intended_stay_months > 12 -> medical_certificate AND xray_certificate AND certificates_issued_months_before_lodgement < 3"
+    evidence: [EV-MEDICAL-INZ1007, EV-XRAY-INZ1096]
+
+  - id: GEN-CHARACTER
+    title: Good character and no potential security risk
+    kind: discretionary
+    ref: A5.1
+    quote: "Applicants for all visas must: be of good character; and not pose a potential security risk."
+
+  - id: GEN-POLICE-CERT
+    title: Police certificates less than six months old at lodgement (when required)
+    kind: objective
+    ref: A5.10
+    quote: "All police certificates must be less than six months old at the time an application is lodged"
+    condition: "police_certificate_age_months_at_lodgement < 6"
+    evidence: [EV-POLICE-CERT]
+
+  - id: GEN-RES-HEALTH
+    title: Acceptable standard of health (residence)
+    kind: discretionary
+    versions:
+      - ref: A4.10
+        quote: "Applicants for residence class visas must have an acceptable standard of health unless they have been granted a medical waiver"
+      - ref: A4.10
+        as_at: 2026-08-01
+        quote: "Applicants for residence class visas must have an acceptable standard of health unless they have been granted a medical waiver"
+    evidence: [EV-MEDICAL-INZ1007, EV-XRAY-INZ1096]
