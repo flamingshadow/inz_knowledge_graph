@@ -37,6 +37,39 @@ If the manual site blocks scripted downloads from your network, open the manual 
 browser and paste `scripts/browser_export.js` into the developer console. It saves the
 same snapshot file.
 
+## Use Claude Desktop as the chat interface
+
+Instead of the built-in assistant (which needs `ANTHROPIC_API_KEY`), Claude Desktop can
+talk to the graph through a local MCP server. `inzkg mcp` offers only the approved
+read-only queries as tools, runs them through the same validation and read-only plan
+check, and writes every call to the hash-chained chat log. It never accepts Cypher.
+
+Add this to `~/Library/Application Support/Claude/claude_desktop_config.json` (Claude
+Desktop → Settings → Developer → Edit Config), using the full path to your clone, then
+restart Claude Desktop:
+
+```json
+{
+  "mcpServers": {
+    "inz-knowledge-graph": {
+      "command": "/full/path/to/inz_knowledge_graph/.venv/bin/inzkg",
+      "args": ["mcp"],
+      "env": {
+        "NEO4J_URI": "bolt://localhost:7687",
+        "NEO4J_USER": "neo4j",
+        "NEO4J_PASSWORD": "localdevpassword"
+      }
+    }
+  }
+}
+```
+
+Neo4j must be running and loaded (`docker compose up -d neo4j`, `inzkg load`). The
+server's instructions carry the same limits as the built-in assistant (dates the
+officer gave, no verdicts on judgement or person-only decisions, never recommend a
+decline), but Claude Desktop applies them itself: the server cannot see the officer's
+words, so it cannot check dates against them the way the web assistant does.
+
 ## How it fits together
 
 ```

@@ -1,4 +1,4 @@
-"""Command line: ``inzkg check | load | fetch | query | ask | serve | verify-log``."""
+"""Command line: ``inzkg check | load | fetch | query | ask | serve | mcp | verify-log``."""
 
 from __future__ import annotations
 
@@ -36,6 +36,8 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("serve", help="run the staff web interface")
     p.add_argument("--host", default="127.0.0.1")
     p.add_argument("--port", type=int, default=8000)
+
+    sub.add_parser("mcp", help="run the MCP server for Claude Desktop (stdin/stdout)")
 
     p = sub.add_parser("verify-log", help="check the chat log's hash chain")
     p.add_argument("path", nargs="?")
@@ -93,6 +95,12 @@ def main(argv: list[str] | None = None) -> int:
         import uvicorn
 
         uvicorn.run("inzkg.web.app:app", host=a.host, port=a.port)
+        return 0
+
+    if a.cmd == "mcp":
+        from .mcp_server import serve
+
+        serve()
         return 0
 
     if a.cmd == "verify-log":
